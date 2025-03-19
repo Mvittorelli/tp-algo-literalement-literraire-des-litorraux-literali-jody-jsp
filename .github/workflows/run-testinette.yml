@@ -1,0 +1,34 @@
+name: Running Testinette using Vitest
+
+on:
+  push:
+    branches: [main]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  run-testinette:
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/ghcr.io/edenschoolfrance/tp_algo-objets-litteraux-javascript:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.github_token }}
+
+      volumes:
+        - ${{ github.workspace }}:/app/src
+      options: --cpus 1
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Remove optional export keyword
+        run: sed -i 's/export function/function/g' /app/src/*
+
+      - name: Add export keyword
+        run: sed -i 's/function/export function/g' /app/src/*
+
+      - name: Running testinette
+        run: cd /app && npm run test
